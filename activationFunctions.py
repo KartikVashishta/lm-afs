@@ -119,8 +119,10 @@ class af(nn.Module):
         torch._assert(x.dtype == y.dtype, f"Expected dtype {x.dtype}, got {y.dtype} after activation {self.afType}") # Check that the type of the input is conserved
         return y
 
+def isGroupedAfType(afType): return isinstance(afType, str) and afType.startswith("group:")
+
 def parseGroupedAfType(afType):
-    assert (isinstance(afType, str) and afType.startswith("group:")), f"Invalid grouped AF spec: {afType}"
+    assert isGroupedAfType(afType), f"Invalid grouped AF spec: {afType}"
     groupAfTypes = [s.strip() for s in afType.split(":", 1)[1].split(",") if s.strip()]
     assert len(groupAfTypes)>=2, f"Need >=2 group activations in grouped spec: {afType}"
     return groupAfTypes

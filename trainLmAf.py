@@ -28,7 +28,7 @@ import torch.nn.functional as F
 from torch.nn.attention.flex_attention import flex_attention, create_block_mask
 
 from dataBin import DataLoaderBin as DataLoader
-from activationFunctions import af
+from activationFunctions import af, isGroupedAfType, afSplit
 from livePlots import LivePlotLoss, LivePlotAct, LivePlotAf
 
 # -----------------------------------------------------------------------------
@@ -115,7 +115,7 @@ config.afType = config.afType.split(";")
 assert len(config.afType) == 2, f"Invalid parameter: {config.afType}"
 config.afType[1] = config.afType[1].removeprefix("att-")
  
-if ("spline" not in config.afType[0]) and ("spline" not in config.afType[0]): # Non-learnable AFs
+if ("spline" not in config.afType[0]) and ("spline" not in config.afType[1]): # Non-learnable AFs
     config.afLr = 0
     config.afLayerSpecific = 0
 if config.afLr == 0:
@@ -357,7 +357,9 @@ class MLP(nn.Module):
         if config.freezeEmbeddings >= 0: # Do not init with 0 when freezeEmbeddings < 0 (whole model frozen except embeddings)
             self.proj.weight.data.zero_() # Zero init of MLP last layer
 
-        self.af = af(config.afType[0], config.afRange, config.afNAnchors, config.afInit, 4 * self.dim, config.dtype)
+        # self.af = af(config.afType[0], config.afRange, config.afNAnchors, config.afInit, 4 * self.dim, config.dtype)
+        if isGroupedAfType(config.afType[0]): self.af=afSplit(config.afType[0], config.afRange, config.afNAnchors, config.afInit, 4 * self.dim, config.dtype)
+        else:  self.af=af(config.afType[0], config.afRange, config.afNAnchors, config.afInit, 4 * self.dim, config.dtype)
 
         # Initialize monitoring of activation magnitudes and normalization
         if config.plottingLevel >= 2: # Will store activation magnitudes
@@ -604,12 +606,22 @@ else: # Fixed AFs
     xs = torch.arange(-10, 10, 0.05, dtype=torch.float32).to(device='cuda') # Default small range
 
 # Function to plot current AFs: evaluate the function, then create/update the figure
+def getAfCurvesForPlot(afModule, xs):
+    if hasattr(afModule, "forwardForPlot"):
+        return afModule.forwardForPlot(xs)
+    return [afModule.forward(xs)]
+
+
 def plotAfs(config, model, xs, step):
     if config.plottingLevel == 0: return
     with torch.no_grad():
-        ys = [model.transformer.h[layerId].mlp.af.forward(xs).cpu().numpy() for layerId in range(config.nLayers if config.afLayerSpecific else 1)]
+        ys = []
+        nLayersToPlot = (config.nLayers if config.afLayerSpecific else 1)
+        for layerId in range(nLayersToPlot):
+            ys.extend([y.cpu().numpy() for y in getAfCurvesForPlot(model.transformer.h[layerId].mlp.af, xs)])
         if model.transformer.h[0].attn.af is not None:
-            ys = ys + [model.transformer.h[layerId].attn.af.forward(xs).cpu().numpy() for layerId in range(config.nLayers if config.afLayerSpecific else 1)]
+            for layerId in range(nLayersToPlot):
+                ys.extend([y.cpu().numpy() for y in getAfCurvesForPlot(model.transformer.h[layerId].attn.af, xs)])
     if livePlots["af"] is None: # First iteration: create the plot
         nTiles = len(ys)
         livePlots["af"] = LivePlotAf("af-" + runName, nTiles, config.afRange, config.afNAnchors)
