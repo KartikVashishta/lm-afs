@@ -691,7 +691,8 @@ for m in model.modules():
 model = torch.compile(model) # Compile model (comment for easier debug)
 
 plotAfs(config, model, xs, 0) # Plot initial AF
-livePlots["af"].flushFig() # Make sure the figure is drawn
+if livePlots.get("af") is not None:
+    livePlots["af"].flushFig() # Make sure the figure is drawn
 
 # Freeze parts of the model
 if config.freezeEmbeddings > 0: # Freeze embeddings
@@ -956,9 +957,13 @@ for step in range(config.nSteps): # 0 to (nSteps-1)
         if (config.plottingLevel >= 1) and livePlots["loss"].shouldStopTraining(): # The loss/acc figure has just been closed by the user
             print(f"Stop requested")
             isLastStep = True # Will stop after saving checkpoint
-        for tmp in livePlots.values(): tmp.drawFig() # Draw figures and make UI responsive
+        for tmp in livePlots.values():
+            if tmp is not None:
+                tmp.drawFig() # Draw figures and make UI responsive
     elif ((step % 5) == 0): # Regularly but not too often (slowish)
-        for tmp in livePlots.values(): tmp.flushFig() # Make UI responsive
+        for tmp in livePlots.values():
+            if tmp is not None:
+                tmp.flushFig() # make UI responsive
 
     # Save AF
     if (isLastStep and (config.saveAfEvery >= 0)) or ((config.saveAfEvery > 0) and ((step % config.saveAfEvery) == 0) and (step > 1)):
@@ -976,8 +981,10 @@ for step in range(config.nSteps): # 0 to (nSteps-1)
 if (config.plottingLevel >= 1):
     fileNameFig = livePlots["loss"].saveFig(config.dirResults)
     if fileNameFig: print(f"Saving plot (loss/acc): {fileNameFig}", flush=True)
-    fileNameFig = livePlots["af"].saveFig(config.dirResults)
-    if fileNameFig: print(f"Saving plot (AF): {fileNameFig}", flush=True)
+    if livePlots.get("af") is not None:
+        fileNameFig = livePlots["af"].saveFig(config.dirResults)
+        if fileNameFig: print(f"Saving plot (AF): {fileNameFig}", flush=True)
 if (config.plottingLevel >= 2):
-    fileNameFig = livePlots["act"].saveFig(config.dirResults)
-    if fileNameFig: print(f"Saving plot (act): {fileNameFig}", flush=True)
+    if livePlots.get("act") is not None:
+        fileNameFig = livePlots["act"].saveFig(config.dirResults)
+        if fileNameFig: print(f"Saving plot (act): {fileNameFig}", flush=True)

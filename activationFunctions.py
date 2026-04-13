@@ -79,7 +79,7 @@ class af(nn.Module):
 
         else: # Learnable AF (spline)
             self.isTrained = True
-            self.afAnchors = torch.linspace(-afRange, afRange, afNAnchors, dtype=torch.float32).to("cuda") # Will remain in float32
+            self.afAnchors = torch.linspace(-afRange, afRange, afNAnchors, dtype=torch.float32) # Will remain in float32
             diffs = torch.diff(self.afAnchors); assert torch.allclose(diffs, diffs[0].expand_as(diffs), rtol=1e-4, atol=1e-4), f"afAnchors not evenly spaced: {self.afAnchors}" # Sanity check: anchors are evenly spaced
             if (afInit == -1.0) and ("splinePerDim" not in self.afType): # Special value: init as linear function
                 self.afVals = nn.Parameter(torch.linspace(-afRange, afRange, afNAnchors, dtype=dtype))
@@ -95,7 +95,7 @@ class af(nn.Module):
     def loadTrainedAf(self, afType, afAnchors, afVals, fineTune=False):
         assert self.afType == afType, f"{self.afType} != {afType}"
         assert self.isParameterized and (afAnchors is not None) and (afVals is not None)
-        self.afAnchors = afAnchors.detach().to("cuda", dtype=torch.float32) # Will remain in float32
+        self.afAnchors = afAnchors.detach().to(dtype=torch.float32) # Will remain in float32
         assert isinstance(afVals, nn.Parameter), f"afVals: {type(afVals)}"
         self.afVals = nn.Parameter(afVals.detach(), requires_grad=fineTune)
         self.isTrained = fineTune
@@ -105,10 +105,14 @@ class af(nn.Module):
         return self.afType.startswith("spline")
 
     def forward(self, x):
+        if (self.afAnchors is not None) and (self.afAnchors.device != x.device):
+            self.afAnchors = self.afAnchors.to(x.device, dtype=torch.float32)
         if   self.afType == "linear":       y = x
         elif self.afType == "gelu":         y = F.gelu(x)
         elif self.afType == "relu":         y = F.relu(x)
         elif self.afType == "relu2":        y = F.relu(x).square() # https://arxiv.org/abs/2109.08668
+        elif self.afType == "silu":         y = F.silu(x)
+        elif self.afType == "tanh":         y = torch.tanh(x)
         elif self.afType == "spline":       y = evalSpline(x, self.afAnchors, self.afVals)
         elif self.afType == "splinePerDim": y = evalSplinePerDim(x, self.afAnchors, self.afVals)
         else: raise ValueError(f"Unknown activation type: {self.afType}")    

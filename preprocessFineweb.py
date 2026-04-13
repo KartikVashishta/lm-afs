@@ -8,6 +8,7 @@ https://huggingface.co/datasets/HuggingFaceFW/fineweb
 '''
 
 import os
+import sys
 import argparse
 import multiprocessing as mp
 import numpy as np
@@ -29,7 +30,8 @@ print(f"Data directory: {args.data_dir}")
 os.makedirs(args.data_dir, exist_ok=True)
 
 # Download the dataset
-data = load_dataset("HuggingFaceFW/fineweb", name="sample-10BT", split="train", cache_dir=args.data_dir)
+print("Loading Fineweb in streaming mode")
+data = load_dataset("HuggingFaceFW/fineweb", name="sample-10BT", split="train", cache_dir=args.data_dir, streaming=True)
 
 # Init the tokenizer
 enc = tiktoken.get_encoding("gpt2")
@@ -64,7 +66,8 @@ for doc in data:
         allTokens[tokenCount:tokenCount+remainder] = tokens[:remainder]
         writeBinFile(filename, allTokens)
         shardId += 1
-        if shardId > args.n_shards: return
+        if shardId > args.n_shards:
+            sys.exit(0)
         progressBar = None
         # Populate the next shard with the leftovers of the current doc
         allTokens[0:len(tokens) - remainder] = tokens[remainder:]

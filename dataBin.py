@@ -48,9 +48,10 @@ def loadBinFile(filename): # Return vector of tokens as np.array uint16
 
 # DataLoader for .bin files
 class DataLoaderBin:
-    def __init__(self, fileNamePattern, seqLength, initFileId=0, shuffle=False, trainingData=True, shuffleTokens=False):
+    def __init__(self, fileNamePattern, seqLength, initFileId=0, shuffle=False, trainingData=True, shuffleTokens=False, device="cuda"):
         self.seqLength = seqLength
         self.shuffle = shuffle
+        self.device = torch.device(device)
         self.fileNames = sorted(glob.glob(fileNamePattern))
         assert len(self.fileNames) > 0, f"Did not find any files that match {fileNamePattern}"
         self.currentFileId = -1
@@ -97,7 +98,7 @@ class DataLoaderBin:
         self.idInFile += 1 # Advance position in current file
         if self.idInFile == len(self.seqStarts): # End of file
             self.loadNextFile()
-        return x.cuda(), y.cuda()
+        return x.to(self.device), y.to(self.device)
 
     def skipBatches(self, nBatches):
         assert nBatches >= 0, f"nBatches ({nBatches}) must be positive"
