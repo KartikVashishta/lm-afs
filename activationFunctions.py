@@ -118,3 +118,42 @@ class af(nn.Module):
         else: raise ValueError(f"Unknown activation type: {self.afType}")    
         torch._assert(x.dtype == y.dtype, f"Expected dtype {x.dtype}, got {y.dtype} after activation {self.afType}") # Check that the type of the input is conserved
         return y
+
+def parseGroupedAfType(afType):
+    assert (isinstance(afType, str) and afType.startswith("group:")), f"Invalid grouped AF spec: {afType}"
+    groupAfTypes = [s.strip() for s in afType.split(":", 1)[1].split(",") if s.strip()]
+    assert len(groupAfTypes)>=2, f"Need >=2 group activations in grouped spec: {afType}"
+    return groupAfTypes
+
+class afSplit(nn.Module):
+    # split the last dim into equal groups and apply one activation per group
+    # syntax: group:relu2,gelu,relu,silu
+    def __init__(self, afType="group:relu2,gelu,relu,silu", afRange=15, afNAnchors=128, afInit=0.01, dim=128, dtype=torch.float32):
+        super().__init__()
+        self.afType=afType
+        self.groupAfTypes = parseGroupedAfType(afType)
+        self.nGroups=len(self.groupAfTypes)
+        self.dim=dim
+        ## todo: graceful division of the activations within the groups 
+        assert self.dim % self.nGroups == 0, f"dim={self.dim} should be divisible by nGroups={self.nGroups} for {afType}"
+        self.dimPerGroup=self.dim//self.nGroups
+        self.afs = nn.ModuleList([af(groupAfType, afRange, afNAnchors, afInit, self.dimPerGroup, dtype) for groupAfType in self.groupAfTypes])
+    
+    @property
+    def isParameterized(self):
+        return any(m.isParameterized for m in self.afs)
+
+    def forward(self, x):
+        #only used as a fallback, proper plotting should use forwardForPlot()
+        if x.ndim==1:
+            ys = [m(x) for m in self.afs]
+            y=torch.stack(ys, dim=0).mean(dim=0)
+        else:
+            assert x.shape[-1]==self.dim, f"Expected last dim {self.dim}, got {x.shape[-1]}"
+            xChunks = x.split(self.dimPerGroup, dim=-1)
+            yChunks = [m(xChunk) for m, xChunk in zip(self.afs, xChunks)]
+            y=torch.cat(yChunks, dim=-1)
+        torch._assert(x.dtype==y.dtype, f"Expected dtype {x.dtype}, got {y.dtype} after grouped activation {self.afType}")
+        return y
+    
+    def forwardForPlot(self, x): return [m(x) for m in self.afs]
