@@ -363,18 +363,45 @@ class MLP(nn.Module):
 
         # Initialize monitoring of activation magnitudes and normalization
         if config.plottingLevel >= 2: # Will store activation magnitudes
-            self.register_buffer("actMonitor2", torch.tensor(0.0, dtype=torch.float32))
-            self.register_buffer("actMonitor3", torch.tensor(0.0, dtype=torch.float32))
+            if isinstance(self.af, afSplit):
+                self.register_buffer("groupPreAbs",  torch.zeros(self.af.nGroups, dtype=torch.float32))
+                self.register_buffer("groupPostAbs", torch.zeros(self.af.nGroups, dtype=torch.float32))
+                self.register_buffer("groupProjAbs", torch.zeros(self.af.nGroups, dtype=torch.float32))
+            else:
+                self.register_buffer("actMonitor2", torch.tensor(0.0, dtype=torch.float32))
+                self.register_buffer("actMonitor3", torch.tensor(0.0, dtype=torch.float32))
+
 
     def forward(self, x):
         x = self.fc(x)
 
-        # Monitoring of activation magnitudes
-        if config.plottingLevel >= 2: # Monitor pre-AF magnitudes
-            self.actMonitor2.fill_(x.abs().mean().detach())
-            self.actMonitor3.fill_(x.abs().max().detach())
+        if isinstance(self.af, afSplit):
+            xChunks = x.split(self.af.dimPerGroup, dim=-1)
 
-        x = self.af(x)
+            if config.plottingLevel >= 2:
+                preAbs = torch.stack([c.abs().mean().detach().float() for c in xChunks])
+                self.groupPreAbs.copy_(preAbs)
+
+            yChunks = [m(c) for m, c in zip(self.af.afs, xChunks)]
+
+            if config.plottingLevel >= 2:
+                postAbs = torch.stack([y.abs().mean().detach().float() for y in yChunks])
+                self.groupPostAbs.copy_(postAbs)
+
+                wChunks = self.proj.weight.split(self.af.dimPerGroup, dim=1)
+                projAbs = torch.stack([
+                    F.linear(y, w.to(y.dtype)).abs().mean().detach().float()
+                    for y, w in zip(yChunks, wChunks)
+                ])
+                self.groupProjAbs.copy_(projAbs)
+
+            x = torch.cat(yChunks, dim=-1)
+        else:
+            if config.plottingLevel >= 2: # Monitor pre-AF magnitudes
+                self.actMonitor2.fill_(x.abs().mean().detach())
+                self.actMonitor3.fill_(x.abs().max().detach())
+            x = self.af(x)
+
         x = self.proj(x)
         return x
 
@@ -596,6 +623,9 @@ if (config.plottingLevel >= 1):
     livePlots["af"] = None # Will be created lated
 if (config.plottingLevel >= 2):
     livePlots["act"] = None # Will be created lated
+    livePlots["group_pre"] = None
+    livePlots["group_post"] = None
+    livePlots["group_proj"] = None
 
 # Determine values on which to evaluate the AF for plotting
 if config.afType[0].startswith("spline") or config.afType[1].startswith("spline"): # Learned AFs
@@ -626,6 +656,31 @@ def plotAfs(config, model, xs, step):
         nTiles = len(ys)
         livePlots["af"] = LivePlotAf("af-" + runName, nTiles, config.afRange, config.afNAnchors)
     livePlots["af"].plot(step, xs.cpu().numpy(), ys)
+
+
+def plotGroupedMlpMagnitudes(model, step):
+    mlps = [blk.mlp for blk in model.transformer.h if hasattr(blk.mlp, "groupPreAbs")]
+    if not mlps:
+        return
+    nGroups = mlps[0].af.nGroups
+    for plotName, attrName in [
+        ("group_pre", "groupPreAbs"),
+        ("group_post", "groupPostAbs"),
+        ("group_proj", "groupProjAbs"),
+    ]:
+        if livePlots[plotName] is None:
+            livePlots[plotName] = LivePlotAct(
+                plotName.replace("_", "-") + "-" + runName,
+                plotName.replace("_", "-"),
+                minVal=0.0,
+                maxVal=config.afRange,
+                nCurves=len(mlps),
+                nGroups=nGroups,
+                nStepsTotal=config.nSteps,
+            )
+        vals = torch.stack([getattr(m, attrName).detach().cpu() for m in mlps]) # [nLayers, nGroups]
+        for groupId in range(nGroups):
+            livePlots[plotName].plot(groupId + 1, step, vals[:, groupId].tolist())
 
 # -----------------------------------------------------------------------------
 # Load data (tokens)
@@ -961,6 +1016,7 @@ for step in range(config.nSteps): # 0 to (nSteps-1)
                     livePlots["act"] = LivePlotAct("act-" + runName, "Magnitude of activations", 0, 1*config.afRange, nMagnitudes, 3, config.nSteps)
                 livePlots["act"].plot(k, step+1, magnitudes) # Update the plot
                 print(f"Step {step+1}/{config.nSteps}   Activation magnitudes ({k}): {" ".join(f"{x:4.2f}" for x in magnitudes)}")
+            plotGroupedMlpMagnitudes(modelEval, step+1)
         if (config.plottingLevel >= 1):
             livePlots["loss"].plot(step+1, lossTrToPlot, None, None, accTrToPlot, None, None, timeElapsed1=timeSpentTraining, timeElapsed2=timeSpentTotal) # Update plot (tr curve)
         lossTrToPlot.fill(0); accTrToPlot.fill(0) # Reset
@@ -997,6 +1053,7 @@ if (config.plottingLevel >= 1):
         fileNameFig = livePlots["af"].saveFig(config.dirResults)
         if fileNameFig: print(f"Saving plot (AF): {fileNameFig}", flush=True)
 if (config.plottingLevel >= 2):
-    if livePlots.get("act") is not None:
-        fileNameFig = livePlots["act"].saveFig(config.dirResults)
-        if fileNameFig: print(f"Saving plot (act): {fileNameFig}", flush=True)
+    for plotName in ["act", "group_pre", "group_post", "group_proj"]:
+        if livePlots.get(plotName) is not None:
+            fileNameFig = livePlots[plotName].saveFig(config.dirResults)
+            if fileNameFig: print(f"Saving plot ({plotName.replace('_', '-')}): {fileNameFig}", flush=True)
