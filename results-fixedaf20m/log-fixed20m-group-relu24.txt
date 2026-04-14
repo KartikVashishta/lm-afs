@@ -1,0 +1,547 @@
+Hyperparameters:
+  runName = "fixed20m-group-relu24"
+  seed = 0
+  plotMinAcc = 0.0
+  plotMaxAcc = 0.4
+  plotMinLoss = 3.0
+  plotMaxLoss = 15.0
+  shuffleTrData = 1
+  tokenDocSep = 50256
+  nLayers = 4
+  nHeads = 4
+  dimEmb = 256
+  tieEmbeddings = True
+  lr = 0.0006
+  freezeEmbeddings = 0
+  batchSize = 1
+  seqLength = 4096
+  contextSize = 1024
+  nSteps = 20000
+  nStepsWarmup = 2000
+  nStepsCooldown = 10000
+  lrSchedule = "trap"
+  wtDecay = 0.0
+  nModels = 1
+  staggeredStarts = 2
+  sameDataAcrossModels = False
+  sameInitAcrossModels = False
+  adamB1 = 0.8
+  adamB2 = 0.95
+  gradientClipping = 0
+  afType = ['group:relu2,relu2,relu2,relu2', 'linear']
+  afLayerSpecific = 0
+  afRange = 15
+  afNAnchors = 64
+  afInit = 0.01
+  afLr = 0
+  afAdamB1 = 0.99
+  afAdamB2 = 0.999
+  afFileToLoad = ""
+  dirResults = "/root/lm-afs/results-fixedaf20m"
+  filesTokensTr = "./data-fineweb10B/fineweb_train_*.bin"
+  filesTokensVa = "./data-fineweb10B/fineweb_val_*.bin"
+  nTokensVa = 10485760
+  valEvery = 500
+  saveModelEvery = -1
+  saveAfEvery = -1
+  plotEvery = 200
+  plottingLevel = 2
+  dtype = torch.float32
+  flexBlockSize = 32
+====================================================================================================
+pytorch 2.11.0+cu128, CUDA 12.8
+Mon Apr 13 09:42:47 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.153.02             Driver Version: 570.153.02     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 5060 Ti     On  |   00000000:82:00.0 Off |                  N/A |
+| 34%   42C    P1             14W /  180W |     135MiB /  16311MiB |      2%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|    0   N/A  N/A            2181      C   /venv/main/bin/python                   126MiB |
++-----------------------------------------------------------------------------------------+
+
+Tr data: 100,000,000 tokens, 8 files (./data-fineweb10B/fineweb_train_*.bin)
+Va data: 12,500,000 tokens, 1 files (./data-fineweb10B/fineweb_val_*.bin)
+Number of validation batches: 2,560 (10,485,760 tokens, 4,096 tokens/sequence)
+====================================================================================================
+Projected number of training tokens:
+  20,000 steps * 1 batchSize * 4,096 seqLength
+  = 81,920,000 tokens
+  = 0.82 epochs
+Vocabulary size: 50,304
+====================================================================================================
+Number of model parameters (frozen): 0
+Number of model parameters (trainable): 16,026,134
+  _orig_mod.skipWeights                              2
+  _orig_mod.transformer.wte.weight                   12,877,824
+  _orig_mod.transformer.h.0.blockLambdas             2
+  _orig_mod.transformer.h.0.attn.lambdas             1
+  _orig_mod.transformer.h.0.attn.projAtt.weight      1
+  _orig_mod.transformer.h.0.attn.projAtt.bias        1
+  _orig_mod.transformer.h.0.attn.projQ.weight        65,536
+  _orig_mod.transformer.h.0.attn.projK.weight        65,536
+  _orig_mod.transformer.h.0.attn.projV.weight        65,536
+  _orig_mod.transformer.h.0.attn.projOut.weight      65,536
+  _orig_mod.transformer.h.0.mlp.fc.weight            262,144
+  _orig_mod.transformer.h.0.mlp.proj.weight          262,144
+  _orig_mod.transformer.h.0.normAtt.weight           256
+  _orig_mod.transformer.h.0.normMlp.weight           256
+  _orig_mod.transformer.h.1.blockLambdas             2
+  _orig_mod.transformer.h.1.attn.lambdas             1
+  _orig_mod.transformer.h.1.attn.projAtt.weight      1
+  _orig_mod.transformer.h.1.attn.projAtt.bias        1
+  _orig_mod.transformer.h.1.attn.projQ.weight        65,536
+  _orig_mod.transformer.h.1.attn.projK.weight        65,536
+  _orig_mod.transformer.h.1.attn.projV.weight        65,536
+  _orig_mod.transformer.h.1.attn.projOut.weight      65,536
+  _orig_mod.transformer.h.1.mlp.fc.weight            262,144
+  _orig_mod.transformer.h.1.mlp.proj.weight          262,144
+  _orig_mod.transformer.h.1.normAtt.weight           256
+  _orig_mod.transformer.h.1.normMlp.weight           256
+  _orig_mod.transformer.h.2.blockLambdas             2
+  _orig_mod.transformer.h.2.attn.lambdas             1
+  _orig_mod.transformer.h.2.attn.projAtt.weight      1
+  _orig_mod.transformer.h.2.attn.projAtt.bias        1
+  _orig_mod.transformer.h.2.attn.projQ.weight        65,536
+  _orig_mod.transformer.h.2.attn.projK.weight        65,536
+  _orig_mod.transformer.h.2.attn.projV.weight        65,536
+  _orig_mod.transformer.h.2.attn.projOut.weight      65,536
+  _orig_mod.transformer.h.2.mlp.fc.weight            262,144
+  _orig_mod.transformer.h.2.mlp.proj.weight          262,144
+  _orig_mod.transformer.h.2.normAtt.weight           256
+  _orig_mod.transformer.h.2.normMlp.weight           256
+  _orig_mod.transformer.h.3.blockLambdas             2
+  _orig_mod.transformer.h.3.attn.lambdas             1
+  _orig_mod.transformer.h.3.attn.projAtt.weight      1
+  _orig_mod.transformer.h.3.attn.projAtt.bias        1
+  _orig_mod.transformer.h.3.attn.projQ.weight        65,536
+  _orig_mod.transformer.h.3.attn.projK.weight        65,536
+  _orig_mod.transformer.h.3.attn.projV.weight        65,536
+  _orig_mod.transformer.h.3.attn.projOut.weight      65,536
+  _orig_mod.transformer.h.3.mlp.fc.weight            262,144
+  _orig_mod.transformer.h.3.mlp.proj.weight          262,144
+  _orig_mod.transformer.h.3.normAtt.weight           256
+  _orig_mod.transformer.h.3.normMlp.weight           256
+  _orig_mod.normWte.weight                           256
+  _orig_mod.normWte.bias                             256
+5.1 tokens/parameter
+====================================================================================================
+Optimizer #0/0: Adam
+  Param group 0: lr=0.0006, weight_decay=0.0
+  _orig_mod.skipWeights
+  _orig_mod.transformer.wte.weight
+  _orig_mod.transformer.h.0.blockLambdas
+  _orig_mod.transformer.h.0.attn.lambdas
+  _orig_mod.transformer.h.0.attn.projAtt.weight
+  _orig_mod.transformer.h.0.attn.projAtt.bias
+  _orig_mod.transformer.h.0.attn.projQ.weight
+  _orig_mod.transformer.h.0.attn.projK.weight
+  _orig_mod.transformer.h.0.attn.projV.weight
+  _orig_mod.transformer.h.0.attn.projOut.weight
+  _orig_mod.transformer.h.0.mlp.fc.weight
+  _orig_mod.transformer.h.0.mlp.proj.weight
+  _orig_mod.transformer.h.0.normAtt.weight
+  _orig_mod.transformer.h.0.normMlp.weight
+  _orig_mod.transformer.h.1.blockLambdas
+  _orig_mod.transformer.h.1.attn.lambdas
+  _orig_mod.transformer.h.1.attn.projAtt.weight
+  _orig_mod.transformer.h.1.attn.projAtt.bias
+  _orig_mod.transformer.h.1.attn.projQ.weight
+  _orig_mod.transformer.h.1.attn.projK.weight
+  _orig_mod.transformer.h.1.attn.projV.weight
+  _orig_mod.transformer.h.1.attn.projOut.weight
+  _orig_mod.transformer.h.1.mlp.fc.weight
+  _orig_mod.transformer.h.1.mlp.proj.weight
+  _orig_mod.transformer.h.1.normAtt.weight
+  _orig_mod.transformer.h.1.normMlp.weight
+  _orig_mod.transformer.h.2.blockLambdas
+  _orig_mod.transformer.h.2.attn.lambdas
+  _orig_mod.transformer.h.2.attn.projAtt.weight
+  _orig_mod.transformer.h.2.attn.projAtt.bias
+  _orig_mod.transformer.h.2.attn.projQ.weight
+  _orig_mod.transformer.h.2.attn.projK.weight
+  _orig_mod.transformer.h.2.attn.projV.weight
+  _orig_mod.transformer.h.2.attn.projOut.weight
+  _orig_mod.transformer.h.2.mlp.fc.weight
+  _orig_mod.transformer.h.2.mlp.proj.weight
+  _orig_mod.transformer.h.2.normAtt.weight
+  _orig_mod.transformer.h.2.normMlp.weight
+  _orig_mod.transformer.h.3.blockLambdas
+  _orig_mod.transformer.h.3.attn.lambdas
+  _orig_mod.transformer.h.3.attn.projAtt.weight
+  _orig_mod.transformer.h.3.attn.projAtt.bias
+  _orig_mod.transformer.h.3.attn.projQ.weight
+  _orig_mod.transformer.h.3.attn.projK.weight
+  _orig_mod.transformer.h.3.attn.projV.weight
+  _orig_mod.transformer.h.3.attn.projOut.weight
+  _orig_mod.transformer.h.3.mlp.fc.weight
+  _orig_mod.transformer.h.3.mlp.proj.weight
+  _orig_mod.transformer.h.3.normAtt.weight
+  _orig_mod.transformer.h.3.normMlp.weight
+  _orig_mod.normWte.weight
+  _orig_mod.normWte.bias
+====================================================================================================
+Step 1/20000   lossVa 15.2587   accVa 0.0
+Step 1/20000   lossTr 15.2677   accTr 0.0   16s = 15.74s/step
+Step 1/20000   Activation magnitudes (2): 0.80 0.25 0.80 0.26 0.80 0.25 0.80 0.26
+Step 1/20000   Activation magnitudes (3): 4.77 1.64 4.77 1.65 4.77 1.59 4.77 1.69
+Step 6/20000   Peak CUDA memory usage: 1.339 GB
+Step 6/20000   lossTr 15.2376   accTr 0.0   28s = 2.37s/step
+Step 6/20000   Activation magnitudes (2): 0.80 0.25 0.80 0.26 0.80 0.25 0.80 0.26
+Step 6/20000   Activation magnitudes (3): 4.49 1.56 4.49 1.75 4.49 1.63 4.49 1.69
+Step 11/20000   Peak CUDA memory usage: 1.320 GB
+Step 201/20000   lossTr 13.4355   accTr 0.6   34s = 0.03s/step
+Step 201/20000   Activation magnitudes (2): 0.80 0.32 0.81 0.42 0.82 0.61 0.83 0.66
+Step 201/20000   Activation magnitudes (3): 4.66 2.66 4.59 2.41 4.52 2.18 4.37 2.13
+Step 401/20000   lossTr 7.9879   accTr 5.5   41s = 0.03s/step
+Step 401/20000   Activation magnitudes (2): 0.81 0.58 0.82 0.95 0.81 0.96 0.82 0.97
+Step 401/20000   Activation magnitudes (3): 5.03 3.74 5.43 3.12 4.97 2.85 4.83 2.65
+Step 501/20000   lossVa 7.0981   accVa 10.6
+Step 601/20000   lossTr 7.1393   accTr 10.4   47s = 0.03s/step
+Step 601/20000   Activation magnitudes (2): 0.82 0.47 0.81 0.54 0.81 0.71 0.81 0.63
+Step 601/20000   Activation magnitudes (3): 5.04 4.36 5.08 2.92 4.91 2.83 5.04 2.95
+Step 801/20000   lossTr 6.8367   accTr 12.4   54s = 0.03s/step
+Step 801/20000   Activation magnitudes (2): 0.82 0.46 0.81 0.46 0.81 0.52 0.81 0.55
+Step 801/20000   Activation magnitudes (3): 5.42 4.76 4.82 2.97 4.95 3.29 5.07 3.63
+Step 1001/20000   lossVa 6.6018   accVa 14.0
+Step 1001/20000   lossTr 6.6883   accTr 13.2   61s = 0.03s/step
+Step 1001/20000   Activation magnitudes (2): 0.82 0.45 0.81 0.41 0.81 0.45 0.79 0.46
+Step 1001/20000   Activation magnitudes (3): 5.21 5.13 4.77 3.10 5.39 3.66 5.73 3.67
+Step 1201/20000   lossTr 6.5931   accTr 14.0   68s = 0.03s/step
+Step 1201/20000   Activation magnitudes (2): 0.83 0.44 0.80 0.36 0.80 0.38 0.79 0.42
+Step 1201/20000   Activation magnitudes (3): 4.82 5.78 4.89 2.96 6.23 4.01 6.73 4.02
+Step 1401/20000   lossTr 6.4312   accTr 14.9   74s = 0.03s/step
+Step 1401/20000   Activation magnitudes (2): 0.83 0.44 0.80 0.35 0.79 0.38 0.79 0.42
+Step 1401/20000   Activation magnitudes (3): 5.04 6.28 6.78 3.26 7.17 4.88 8.30 4.53
+Step 1501/20000   lossVa 6.3243   accVa 15.6
+Step 1601/20000   lossTr 6.2938   accTr 15.6   81s = 0.03s/step
+Step 1601/20000   Activation magnitudes (2): 0.84 0.43 0.79 0.37 0.76 0.43 0.74 0.39
+Step 1601/20000   Activation magnitudes (3): 5.31 6.55 8.41 3.62 8.41 4.69 9.10 3.90
+Step 1801/20000   lossTr 6.2441   accTr 15.8   88s = 0.03s/step
+Step 1801/20000   Activation magnitudes (2): 0.85 0.43 0.79 0.40 0.77 0.46 0.77 0.40
+Step 1801/20000   Activation magnitudes (3): 5.12 6.65 9.02 4.43 9.07 5.31 9.75 4.92
+Step 2001/20000   lossVa 6.1567   accVa 16.6
+Step 2001/20000   lossTr 6.1824   accTr 16.3   94s = 0.03s/step
+Step 2001/20000   Activation magnitudes (2): 0.85 0.43 0.78 0.44 0.75 0.47 0.75 0.41
+Step 2001/20000   Activation magnitudes (3): 6.70 6.20 9.26 5.31 9.75 6.20 11.50 4.65
+Step 2201/20000   lossTr 6.1450   accTr 16.3   101s = 0.03s/step
+Step 2201/20000   Activation magnitudes (2): 0.86 0.43 0.78 0.49 0.75 0.54 0.76 0.44
+Step 2201/20000   Activation magnitudes (3): 6.69 6.07 8.58 5.55 10.22 6.76 11.87 4.70
+Step 2401/20000   lossTr 6.0624   accTr 16.9   107s = 0.03s/step
+Step 2401/20000   Activation magnitudes (2): 0.86 0.44 0.78 0.54 0.74 0.59 0.74 0.45
+Step 2401/20000   Activation magnitudes (3): 6.49 6.17 7.82 5.75 10.41 6.92 12.34 4.81
+Step 2501/20000   lossVa 6.0308   accVa 17.0
+Step 2601/20000   lossTr 5.9960   accTr 17.3   114s = 0.03s/step
+Step 2601/20000   Activation magnitudes (2): 0.86 0.46 0.78 0.58 0.73 0.63 0.74 0.48
+Step 2601/20000   Activation magnitudes (3): 6.96 5.97 7.53 5.12 10.35 5.84 12.20 4.73
+Step 2801/20000   lossTr 5.9675   accTr 17.6   121s = 0.03s/step
+Step 2801/20000   Activation magnitudes (2): 0.87 0.48 0.79 0.64 0.74 0.67 0.74 0.51
+Step 2801/20000   Activation magnitudes (3): 6.16 5.94 7.62 5.24 10.74 6.07 12.78 4.25
+Step 3001/20000   lossVa 5.8736   accVa 18.1
+Step 3001/20000   lossTr 5.9433   accTr 17.6   127s = 0.03s/step
+Step 3001/20000   Activation magnitudes (2): 0.86 0.48 0.79 0.68 0.74 0.70 0.73 0.51
+Step 3001/20000   Activation magnitudes (3): 6.80 5.90 7.77 5.46 10.79 6.09 12.55 4.82
+Step 3201/20000   lossTr 5.9057   accTr 18.0   134s = 0.03s/step
+Step 3201/20000   Activation magnitudes (2): 0.88 0.49 0.80 0.69 0.75 0.78 0.76 0.56
+Step 3201/20000   Activation magnitudes (3): 7.03 5.71 8.02 5.40 9.74 6.17 11.65 4.81
+Step 3401/20000   lossTr 5.8266   accTr 18.2   141s = 0.03s/step
+Step 3401/20000   Activation magnitudes (2): 0.88 0.50 0.80 0.73 0.74 0.75 0.72 0.54
+Step 3401/20000   Activation magnitudes (3): 7.65 6.06 7.79 5.31 10.45 6.45 12.55 5.10
+Step 3501/20000   lossVa 5.8201   accVa 18.5
+Step 3601/20000   lossTr 5.8673   accTr 18.3   147s = 0.03s/step
+Step 3601/20000   Activation magnitudes (2): 0.87 0.51 0.81 0.76 0.74 0.82 0.73 0.57
+Step 3601/20000   Activation magnitudes (3): 7.86 5.85 8.25 5.80 9.93 6.01 11.74 4.91
+Step 3801/20000   lossTr 5.7901   accTr 18.7   154s = 0.03s/step
+Step 3801/20000   Activation magnitudes (2): 0.88 0.53 0.82 0.80 0.76 0.82 0.74 0.59
+Step 3801/20000   Activation magnitudes (3): 7.66 5.85 8.35 6.04 9.70 6.31 12.57 5.36
+Step 4001/20000   lossVa 5.7435   accVa 19.0
+Step 4001/20000   lossTr 5.7580   accTr 18.8   161s = 0.03s/step
+Step 4001/20000   Activation magnitudes (2): 0.87 0.54 0.83 0.86 0.76 0.87 0.72 0.58
+Step 4001/20000   Activation magnitudes (3): 7.79 5.83 8.98 5.61 10.96 6.26 12.55 6.11
+Step 4201/20000   lossTr 5.7639   accTr 18.8   167s = 0.03s/step
+Step 4201/20000   Activation magnitudes (2): 0.88 0.55 0.83 0.83 0.77 0.87 0.73 0.60
+Step 4201/20000   Activation magnitudes (3): 7.68 6.13 9.04 5.58 11.04 6.96 13.43 5.17
+Step 4401/20000   lossTr 5.6677   accTr 19.4   174s = 0.03s/step
+Step 4401/20000   Activation magnitudes (2): 0.89 0.55 0.83 0.88 0.78 0.92 0.72 0.63
+Step 4401/20000   Activation magnitudes (3): 7.56 6.47 8.98 5.93 11.28 7.13 12.57 5.61
+Step 4501/20000   lossVa 5.6973   accVa 19.4
+Step 4601/20000   lossTr 5.7276   accTr 19.1   181s = 0.03s/step
+Step 4601/20000   Activation magnitudes (2): 0.89 0.56 0.84 0.89 0.80 0.93 0.73 0.62
+Step 4601/20000   Activation magnitudes (3): 7.44 5.98 9.14 5.95 11.26 6.90 13.07 5.41
+Step 4801/20000   lossTr 5.6413   accTr 19.7   187s = 0.03s/step
+Step 4801/20000   Activation magnitudes (2): 0.89 0.57 0.84 0.91 0.79 0.90 0.70 0.59
+Step 4801/20000   Activation magnitudes (3): 7.46 6.48 9.10 5.65 11.97 6.93 12.76 5.01
+Step 5001/20000   lossVa 5.6722   accVa 19.6
+Step 5001/20000   lossTr 5.6811   accTr 19.6   194s = 0.03s/step
+Step 5001/20000   Activation magnitudes (2): 0.90 0.59 0.85 0.98 0.83 0.99 0.73 0.64
+Step 5001/20000   Activation magnitudes (3): 7.27 5.96 9.58 6.67 11.92 7.01 13.38 6.02
+Step 5201/20000   lossTr 5.6593   accTr 19.6   201s = 0.03s/step
+Step 5201/20000   Activation magnitudes (2): 0.91 0.60 0.84 0.97 0.83 0.97 0.73 0.65
+Step 5201/20000   Activation magnitudes (3): 7.23 5.99 9.32 6.50 12.35 7.10 13.27 5.10
+Step 5401/20000   lossTr 5.5636   accTr 20.2   207s = 0.03s/step
+Step 5401/20000   Activation magnitudes (2): 0.92 0.60 0.84 1.01 0.86 0.98 0.72 0.66
+Step 5401/20000   Activation magnitudes (3): 7.05 6.39 9.83 6.46 13.30 6.95 13.78 5.42
+Step 5501/20000   lossVa 5.5736   accVa 20.4
+Step 5601/20000   lossTr 5.5666   accTr 20.5   214s = 0.03s/step
+Step 5601/20000   Activation magnitudes (2): 0.94 0.61 0.85 1.01 0.89 1.02 0.74 0.68
+Step 5601/20000   Activation magnitudes (3): 6.94 6.33 9.66 7.16 13.42 7.18 13.98 6.10
+Step 5801/20000   lossTr 5.5366   accTr 20.6   221s = 0.03s/step
+Step 5801/20000   Activation magnitudes (2): 0.95 0.62 0.86 1.00 0.92 1.04 0.75 0.71
+Step 5801/20000   Activation magnitudes (3): 7.14 6.57 9.83 6.21 14.19 7.13 13.90 5.97
+Step 6001/20000   lossVa 5.5446   accVa 20.9
+Step 6001/20000   lossTr 5.5631   accTr 20.5   227s = 0.03s/step
+Step 6001/20000   Activation magnitudes (2): 0.96 0.63 0.86 1.05 0.94 1.05 0.74 0.70
+Step 6001/20000   Activation magnitudes (3): 6.83 6.10 9.81 6.40 14.51 7.59 14.27 6.02
+Step 6201/20000   lossTr 5.5436   accTr 20.8   234s = 0.03s/step
+Step 6201/20000   Activation magnitudes (2): 0.97 0.64 0.85 1.03 0.98 1.04 0.75 0.69
+Step 6201/20000   Activation magnitudes (3): 7.08 6.12 10.03 6.65 15.10 7.36 14.32 6.53
+Step 6401/20000   lossTr 5.4610   accTr 21.3   241s = 0.03s/step
+Step 6401/20000   Activation magnitudes (2): 0.99 0.64 0.85 1.05 1.00 1.06 0.76 0.69
+Step 6401/20000   Activation magnitudes (3): 6.96 6.26 10.14 6.39 15.75 7.43 14.67 5.69
+Step 6501/20000   lossVa 5.4753   accVa 21.4
+Step 6601/20000   lossTr 5.4380   accTr 21.6   247s = 0.03s/step
+Step 6601/20000   Activation magnitudes (2): 1.01 0.64 0.85 1.05 1.03 1.05 0.78 0.73
+Step 6601/20000   Activation magnitudes (3): 6.89 6.37 10.23 6.60 16.21 7.30 15.21 6.15
+Step 6801/20000   lossTr 5.4247   accTr 21.7   254s = 0.03s/step
+Step 6801/20000   Activation magnitudes (2): 1.03 0.64 0.85 1.08 1.06 1.13 0.80 0.77
+Step 6801/20000   Activation magnitudes (3): 6.48 6.40 9.91 7.82 17.10 7.95 15.10 6.34
+Step 7001/20000   lossVa 5.4328   accVa 21.8
+Step 7001/20000   lossTr 5.4585   accTr 21.7   261s = 0.03s/step
+Step 7001/20000   Activation magnitudes (2): 1.04 0.65 0.85 1.14 1.09 1.11 0.78 0.74
+Step 7001/20000   Activation magnitudes (3): 6.64 6.67 9.95 7.04 17.02 7.92 15.34 6.27
+Step 7201/20000   lossTr 5.4063   accTr 21.9   267s = 0.03s/step
+Step 7201/20000   Activation magnitudes (2): 1.06 0.65 0.85 1.15 1.12 1.12 0.82 0.77
+Step 7201/20000   Activation magnitudes (3): 6.52 6.83 9.86 6.85 17.59 7.39 15.47 7.59
+Step 7401/20000   lossTr 5.3816   accTr 22.3   274s = 0.03s/step
+Step 7401/20000   Activation magnitudes (2): 1.07 0.66 0.85 1.12 1.15 1.17 0.83 0.79
+Step 7401/20000   Activation magnitudes (3): 6.24 7.03 9.94 6.76 16.92 7.18 15.49 6.00
+Step 7501/20000   lossVa 5.3908   accVa 22.3
+Step 7601/20000   lossTr 5.4009   accTr 22.0   280s = 0.03s/step
+Step 7601/20000   Activation magnitudes (2): 1.07 0.67 0.84 1.13 1.15 1.16 0.82 0.77
+Step 7601/20000   Activation magnitudes (3): 6.49 7.01 9.64 6.81 17.91 7.53 16.06 6.41
+Step 7801/20000   lossTr 5.3289   accTr 22.5   287s = 0.03s/step
+Step 7801/20000   Activation magnitudes (2): 1.08 0.67 0.84 1.12 1.17 1.13 0.83 0.77
+Step 7801/20000   Activation magnitudes (3): 6.52 7.17 9.39 7.52 17.62 8.39 15.35 6.32
+Step 8001/20000   lossVa 5.3633   accVa 22.7
+Step 8001/20000   lossTr 5.3721   accTr 22.5   294s = 0.03s/step
+Step 8001/20000   Activation magnitudes (2): 1.09 0.69 0.85 1.19 1.20 1.18 0.83 0.79
+Step 8001/20000   Activation magnitudes (3): 7.02 7.69 9.54 7.38 17.15 8.02 16.15 6.28
+Step 8201/20000   lossTr 5.3401   accTr 22.5   300s = 0.03s/step
+Step 8201/20000   Activation magnitudes (2): 1.10 0.68 0.84 1.17 1.21 1.17 0.85 0.79
+Step 8201/20000   Activation magnitudes (3): 6.59 7.34 9.65 7.37 18.19 7.68 16.25 6.27
+Step 8401/20000   lossTr 5.2853   accTr 23.1   307s = 0.03s/step
+Step 8401/20000   Activation magnitudes (2): 1.11 0.68 0.85 1.19 1.23 1.22 0.86 0.81
+Step 8401/20000   Activation magnitudes (3): 6.60 7.40 9.72 7.82 17.66 7.62 16.34 6.97
+Step 8501/20000   lossVa 5.3519   accVa 22.6
+Step 8601/20000   lossTr 5.3233   accTr 22.8   313s = 0.03s/step
+Step 8601/20000   Activation magnitudes (2): 1.12 0.68 0.84 1.16 1.24 1.18 0.87 0.81
+Step 8601/20000   Activation magnitudes (3): 6.83 7.48 9.59 7.42 17.71 8.11 16.33 7.15
+Step 8801/20000   lossTr 5.3074   accTr 22.9   320s = 0.03s/step
+Step 8801/20000   Activation magnitudes (2): 1.12 0.69 0.84 1.19 1.26 1.23 0.88 0.82
+Step 8801/20000   Activation magnitudes (3): 7.09 7.51 9.46 7.55 18.85 7.72 16.61 6.67
+Step 9001/20000   lossVa 5.3108   accVa 23.1
+Step 9001/20000   lossTr 5.3451   accTr 22.6   327s = 0.03s/step
+Step 9001/20000   Activation magnitudes (2): 1.11 0.71 0.85 1.24 1.27 1.22 0.87 0.84
+Step 9001/20000   Activation magnitudes (3): 7.38 7.36 9.23 7.68 17.24 8.12 16.75 6.66
+Step 9201/20000   lossTr 5.2888   accTr 22.9   333s = 0.03s/step
+Step 9201/20000   Activation magnitudes (2): 1.12 0.70 0.85 1.17 1.28 1.20 0.88 0.81
+Step 9201/20000   Activation magnitudes (3): 7.66 7.74 9.21 7.50 17.61 8.49 16.98 6.68
+Step 9401/20000   lossTr 5.3420   accTr 22.8   340s = 0.03s/step
+Step 9401/20000   Activation magnitudes (2): 1.13 0.71 0.84 1.19 1.29 1.25 0.90 0.84
+Step 9401/20000   Activation magnitudes (3): 7.85 7.56 9.30 7.96 18.25 8.46 17.13 7.10
+Step 9501/20000   lossVa 5.3026   accVa 23.2
+Step 9601/20000   lossTr 5.2701   accTr 23.3   347s = 0.03s/step
+Step 9601/20000   Activation magnitudes (2): 1.13 0.73 0.84 1.24 1.30 1.21 0.91 0.86
+Step 9601/20000   Activation magnitudes (3): 8.02 7.68 8.98 7.70 17.91 7.80 17.12 7.19
+Step 9801/20000   lossTr 5.2788   accTr 23.1   353s = 0.03s/step
+Step 9801/20000   Activation magnitudes (2): 1.13 0.73 0.84 1.22 1.31 1.21 0.91 0.84
+Step 9801/20000   Activation magnitudes (3): 8.16 7.85 9.01 8.59 18.46 8.65 16.84 6.79
+Step 10001/20000   lossVa 5.2560   accVa 23.5
+Step 10001/20000   lossTr 5.2818   accTr 23.1   360s = 0.03s/step
+Step 10001/20000   Activation magnitudes (2): 1.12 0.73 0.85 1.26 1.33 1.23 0.90 0.84
+Step 10001/20000   Activation magnitudes (3): 8.34 7.77 8.95 7.78 17.61 7.65 17.08 6.34
+Step 10201/20000   lossTr 5.2589   accTr 23.4   366s = 0.03s/step
+Step 10201/20000   Activation magnitudes (2): 1.13 0.73 0.85 1.20 1.34 1.24 0.92 0.85
+Step 10201/20000   Activation magnitudes (3): 8.57 8.07 8.72 8.22 17.22 9.46 17.12 7.69
+Step 10401/20000   lossTr 5.2692   accTr 23.3   373s = 0.03s/step
+Step 10401/20000   Activation magnitudes (2): 1.14 0.74 0.85 1.24 1.35 1.24 0.94 0.85
+Step 10401/20000   Activation magnitudes (3): 8.74 7.77 8.76 8.07 16.91 8.08 17.17 8.04
+Step 10501/20000   lossVa 5.2836   accVa 23.6
+Step 10601/20000   lossTr 5.2906   accTr 23.4   380s = 0.03s/step
+Step 10601/20000   Activation magnitudes (2): 1.15 0.75 0.85 1.30 1.35 1.24 0.94 0.90
+Step 10601/20000   Activation magnitudes (3): 8.78 7.87 8.63 7.65 17.02 8.57 17.65 6.60
+Step 10801/20000   lossTr 5.2231   accTr 23.9   386s = 0.03s/step
+Step 10801/20000   Activation magnitudes (2): 1.15 0.76 0.85 1.26 1.38 1.25 0.98 0.89
+Step 10801/20000   Activation magnitudes (3): 8.89 7.88 8.41 8.26 17.51 9.29 17.42 6.79
+Step 11001/20000   lossVa 5.2777   accVa 23.4
+Step 11001/20000   lossTr 5.2312   accTr 23.8   393s = 0.03s/step
+Step 11001/20000   Activation magnitudes (2): 1.14 0.75 0.85 1.29 1.37 1.30 0.94 0.85
+Step 11001/20000   Activation magnitudes (3): 8.92 8.16 8.63 7.93 17.92 7.87 17.88 6.79
+Step 11201/20000   lossTr 5.2166   accTr 23.7   400s = 0.03s/step
+Step 11201/20000   Activation magnitudes (2): 1.15 0.77 0.85 1.31 1.38 1.23 0.96 0.88
+Step 11201/20000   Activation magnitudes (3): 9.09 7.74 8.59 8.83 17.70 9.09 17.96 6.95
+Step 11401/20000   lossTr 5.2664   accTr 23.4   406s = 0.03s/step
+Step 11401/20000   Activation magnitudes (2): 1.16 0.77 0.85 1.27 1.37 1.24 0.97 0.87
+Step 11401/20000   Activation magnitudes (3): 9.05 7.90 8.43 8.26 18.15 7.91 17.96 7.25
+Step 11501/20000   lossVa 5.2097   accVa 24.0
+Step 11601/20000   lossTr 5.1833   accTr 23.8   413s = 0.03s/step
+Step 11601/20000   Activation magnitudes (2): 1.15 0.79 0.85 1.29 1.39 1.21 0.96 0.83
+Step 11601/20000   Activation magnitudes (3): 9.13 8.27 8.33 8.35 18.44 8.47 17.89 7.24
+Step 11801/20000   lossTr 5.1796   accTr 24.1   419s = 0.03s/step
+Step 11801/20000   Activation magnitudes (2): 1.17 0.78 0.85 1.30 1.41 1.27 1.01 0.91
+Step 11801/20000   Activation magnitudes (3): 9.11 8.41 8.36 9.05 16.33 8.04 18.53 7.80
+Step 12001/20000   lossVa 5.1820   accVa 24.2
+Step 12001/20000   lossTr 5.1837   accTr 24.1   426s = 0.03s/step
+Step 12001/20000   Activation magnitudes (2): 1.16 0.79 0.86 1.33 1.41 1.25 1.00 0.87
+Step 12001/20000   Activation magnitudes (3): 9.15 8.40 8.48 8.63 17.73 7.84 18.79 6.82
+Step 12201/20000   lossTr 5.1807   accTr 24.0   433s = 0.03s/step
+Step 12201/20000   Activation magnitudes (2): 1.18 0.78 0.85 1.28 1.42 1.27 1.02 0.88
+Step 12201/20000   Activation magnitudes (3): 9.25 8.58 8.41 8.12 17.81 8.95 18.68 7.55
+Step 12401/20000   lossTr 5.1812   accTr 24.2   439s = 0.03s/step
+Step 12401/20000   Activation magnitudes (2): 1.21 0.77 0.86 1.29 1.42 1.33 1.05 0.94
+Step 12401/20000   Activation magnitudes (3): 9.27 8.04 8.41 7.99 17.88 9.21 19.26 7.60
+Step 12501/20000   lossVa 5.1952   accVa 24.3
+Step 12601/20000   lossTr 5.1636   accTr 24.4   446s = 0.03s/step
+Step 12601/20000   Activation magnitudes (2): 1.19 0.80 0.86 1.31 1.44 1.22 1.05 0.87
+Step 12601/20000   Activation magnitudes (3): 9.37 8.61 8.45 8.20 17.88 7.71 18.81 7.36
+Step 12801/20000   lossTr 5.1816   accTr 24.3   452s = 0.03s/step
+Step 12801/20000   Activation magnitudes (2): 1.20 0.80 0.86 1.32 1.44 1.23 1.04 0.88
+Step 12801/20000   Activation magnitudes (3): 9.35 8.81 8.38 9.32 17.30 8.11 19.38 8.18
+Step 13001/20000   lossVa 5.1855   accVa 24.3
+Step 13001/20000   lossTr 5.1308   accTr 24.7   459s = 0.03s/step
+Step 13001/20000   Activation magnitudes (2): 1.19 0.80 0.87 1.33 1.47 1.22 1.06 0.87
+Step 13001/20000   Activation magnitudes (3): 9.46 8.84 8.24 8.35 18.20 9.08 19.02 7.79
+Step 13201/20000   lossTr 5.1517   accTr 24.3   466s = 0.03s/step
+Step 13201/20000   Activation magnitudes (2): 1.21 0.80 0.86 1.29 1.47 1.22 1.09 0.87
+Step 13201/20000   Activation magnitudes (3): 9.38 8.63 8.32 8.64 18.24 9.24 19.10 8.42
+Step 13401/20000   lossTr 5.1331   accTr 24.7   472s = 0.03s/step
+Step 13401/20000   Activation magnitudes (2): 1.24 0.80 0.86 1.28 1.45 1.23 1.08 0.87
+Step 13401/20000   Activation magnitudes (3): 9.42 8.10 8.40 7.93 18.79 8.86 19.48 7.41
+Step 13501/20000   lossVa 5.1323   accVa 24.7
+Step 13601/20000   lossTr 5.1053   accTr 24.7   479s = 0.03s/step
+Step 13601/20000   Activation magnitudes (2): 1.24 0.82 0.87 1.39 1.47 1.26 1.11 0.89
+Step 13601/20000   Activation magnitudes (3): 9.45 8.58 8.32 8.28 18.81 8.97 19.67 8.63
+Step 13801/20000   lossTr 5.1129   accTr 24.6   486s = 0.03s/step
+Step 13801/20000   Activation magnitudes (2): 1.24 0.82 0.87 1.34 1.48 1.22 1.12 0.90
+Step 13801/20000   Activation magnitudes (3): 9.44 8.21 8.24 9.32 18.09 9.69 19.79 8.42
+Step 14001/20000   lossVa 5.1342   accVa 24.6
+Step 14001/20000   lossTr 5.1034   accTr 24.9   492s = 0.03s/step
+Step 14001/20000   Activation magnitudes (2): 1.23 0.82 0.87 1.34 1.50 1.25 1.10 0.87
+Step 14001/20000   Activation magnitudes (3): 9.49 9.18 8.25 9.06 18.53 8.92 19.88 8.65
+Step 14201/20000   lossTr 5.0573   accTr 25.2   499s = 0.03s/step
+Step 14201/20000   Activation magnitudes (2): 1.23 0.82 0.86 1.36 1.51 1.23 1.12 0.86
+Step 14201/20000   Activation magnitudes (3): 9.49 9.01 8.11 8.51 18.19 8.31 20.21 8.27
+Step 14401/20000   lossTr 5.1169   accTr 24.8   506s = 0.03s/step
+Step 14401/20000   Activation magnitudes (2): 1.24 0.83 0.87 1.36 1.52 1.22 1.14 0.85
+Step 14401/20000   Activation magnitudes (3): 9.50 8.97 8.34 8.08 17.31 9.10 19.79 8.40
+Step 14501/20000   lossVa 5.1142   accVa 24.8
+Step 14601/20000   lossTr 5.0593   accTr 24.8   512s = 0.03s/step
+Step 14601/20000   Activation magnitudes (2): 1.26 0.82 0.87 1.32 1.51 1.26 1.16 0.88
+Step 14601/20000   Activation magnitudes (3): 9.48 8.31 8.09 8.29 18.56 8.94 19.90 8.30
+Step 14801/20000   lossTr 5.0714   accTr 25.0   519s = 0.03s/step
+Step 14801/20000   Activation magnitudes (2): 1.28 0.83 0.87 1.32 1.52 1.28 1.16 0.91
+Step 14801/20000   Activation magnitudes (3): 9.50 8.76 9.14 8.38 18.50 8.50 19.96 9.18
+Step 15001/20000   lossVa 5.1059   accVa 24.9
+Step 15001/20000   lossTr 5.0628   accTr 25.2   526s = 0.03s/step
+Step 15001/20000   Activation magnitudes (2): 1.27 0.84 0.87 1.36 1.53 1.25 1.15 0.86
+Step 15001/20000   Activation magnitudes (3): 9.43 9.05 7.79 8.50 18.43 9.15 19.84 8.89
+Step 15201/20000   lossTr 5.0646   accTr 25.1   532s = 0.03s/step
+Step 15201/20000   Activation magnitudes (2): 1.29 0.83 0.87 1.31 1.53 1.26 1.19 0.89
+Step 15201/20000   Activation magnitudes (3): 9.41 9.26 8.31 8.77 19.76 8.52 20.46 8.96
+Step 15401/20000   lossTr 5.1099   accTr 24.8   539s = 0.03s/step
+Step 15401/20000   Activation magnitudes (2): 1.31 0.83 0.87 1.37 1.54 1.26 1.23 0.90
+Step 15401/20000   Activation magnitudes (3): 9.42 8.48 8.39 8.64 18.16 8.55 20.21 9.25
+Step 15501/20000   lossVa 5.0818   accVa 25.0
+Step 15601/20000   lossTr 5.1256   accTr 25.0   546s = 0.03s/step
+Step 15601/20000   Activation magnitudes (2): 1.30 0.83 0.87 1.34 1.56 1.25 1.20 0.89
+Step 15601/20000   Activation magnitudes (3): 9.39 8.68 8.26 9.24 18.75 9.77 20.12 9.53
+Step 15801/20000   lossTr 5.0629   accTr 25.2   552s = 0.03s/step
+Step 15801/20000   Activation magnitudes (2): 1.31 0.84 0.88 1.35 1.56 1.25 1.24 0.88
+Step 15801/20000   Activation magnitudes (3): 9.36 8.67 8.54 9.28 17.25 10.50 20.33 9.08
+Step 16001/20000   lossVa 5.0648   accVa 25.2
+Step 16001/20000   lossTr 5.0377   accTr 25.4   559s = 0.03s/step
+Step 16001/20000   Activation magnitudes (2): 1.31 0.84 0.88 1.35 1.56 1.26 1.20 0.87
+Step 16001/20000   Activation magnitudes (3): 9.40 9.25 8.15 8.65 18.47 10.51 20.35 10.03
+Step 16201/20000   lossTr 5.0467   accTr 25.0   566s = 0.03s/step
+Step 16201/20000   Activation magnitudes (2): 1.32 0.85 0.88 1.32 1.56 1.25 1.21 0.85
+Step 16201/20000   Activation magnitudes (3): 9.45 8.95 8.03 8.75 18.91 9.97 20.73 9.32
+Step 16401/20000   lossTr 5.0757   accTr 25.0   572s = 0.03s/step
+Step 16401/20000   Activation magnitudes (2): 1.33 0.84 0.88 1.32 1.57 1.27 1.26 0.88
+Step 16401/20000   Activation magnitudes (3): 9.51 9.38 8.07 8.96 18.40 9.70 20.14 11.01
+Step 16501/20000   lossVa 5.0501   accVa 25.3
+Step 16601/20000   lossTr 5.0362   accTr 25.3   579s = 0.03s/step
+Step 16601/20000   Activation magnitudes (2): 1.36 0.82 0.88 1.34 1.57 1.27 1.27 0.89
+Step 16601/20000   Activation magnitudes (3): 9.29 8.73 7.97 8.53 18.78 8.76 20.88 9.80
+Step 16801/20000   lossTr 5.0020   accTr 25.5   585s = 0.03s/step
+Step 16801/20000   Activation magnitudes (2): 1.35 0.83 0.88 1.30 1.59 1.26 1.26 0.89
+Step 16801/20000   Activation magnitudes (3): 9.67 8.91 8.16 8.58 18.41 10.63 21.09 10.37
+Step 17001/20000   lossVa 5.0330   accVa 25.5
+Step 17001/20000   lossTr 5.0138   accTr 25.4   592s = 0.03s/step
+Step 17001/20000   Activation magnitudes (2): 1.34 0.85 0.88 1.37 1.59 1.27 1.25 0.86
+Step 17001/20000   Activation magnitudes (3): 9.73 9.52 8.09 8.54 18.81 10.14 20.67 10.90
+Step 17201/20000   lossTr 5.0467   accTr 25.3   599s = 0.03s/step
+Step 17201/20000   Activation magnitudes (2): 1.35 0.84 0.87 1.39 1.60 1.22 1.27 0.84
+Step 17201/20000   Activation magnitudes (3): 9.73 8.96 8.08 8.64 16.72 9.74 19.71 10.37
+Step 17401/20000   lossTr 5.0013   accTr 25.6   605s = 0.03s/step
+Step 17401/20000   Activation magnitudes (2): 1.35 0.84 0.88 1.31 1.60 1.26 1.28 0.86
+Step 17401/20000   Activation magnitudes (3): 9.77 9.13 8.12 8.84 18.28 10.80 20.41 11.22
+Step 17501/20000   lossVa 5.0229   accVa 25.6
+Step 17601/20000   lossTr 5.0087   accTr 25.5   612s = 0.03s/step
+Step 17601/20000   Activation magnitudes (2): 1.39 0.83 0.88 1.32 1.60 1.28 1.31 0.90
+Step 17601/20000   Activation magnitudes (3): 9.82 8.98 8.09 9.71 17.33 10.30 20.86 10.89
+Step 17801/20000   lossTr 5.0018   accTr 25.4   618s = 0.03s/step
+Step 17801/20000   Activation magnitudes (2): 1.37 0.85 0.88 1.33 1.60 1.28 1.29 0.87
+Step 17801/20000   Activation magnitudes (3): 9.87 9.21 8.05 9.90 18.35 10.70 20.29 11.50
+Step 18001/20000   lossVa 5.0020   accVa 25.7
+Step 18001/20000   lossTr 5.0094   accTr 25.6   625s = 0.03s/step
+Step 18001/20000   Activation magnitudes (2): 1.37 0.86 0.88 1.37 1.61 1.29 1.28 0.87
+Step 18001/20000   Activation magnitudes (3): 9.91 9.40 7.90 9.02 18.75 10.92 20.92 11.68
+Step 18201/20000   lossTr 5.0039   accTr 25.5   632s = 0.03s/step
+Step 18201/20000   Activation magnitudes (2): 1.38 0.84 0.88 1.33 1.61 1.27 1.31 0.86
+Step 18201/20000   Activation magnitudes (3): 9.94 9.76 8.87 8.55 17.82 11.39 21.54 11.61
+Step 18401/20000   lossTr 5.0436   accTr 25.4   638s = 0.03s/step
+Step 18401/20000   Activation magnitudes (2): 1.39 0.85 0.88 1.39 1.63 1.29 1.37 0.91
+Step 18401/20000   Activation magnitudes (3): 9.71 8.97 8.18 8.92 16.15 12.06 20.25 11.86
+Step 18501/20000   lossVa 5.0000   accVa 25.8
+Step 18601/20000   lossTr 4.9958   accTr 25.9   645s = 0.03s/step
+Step 18601/20000   Activation magnitudes (2): 1.40 0.85 0.88 1.36 1.59 1.26 1.30 0.88
+Step 18601/20000   Activation magnitudes (3): 9.52 8.88 8.04 9.36 18.60 11.12 21.65 11.78
+Step 18801/20000   lossTr 4.9710   accTr 26.2   652s = 0.03s/step
+Step 18801/20000   Activation magnitudes (2): 1.40 0.85 0.88 1.32 1.62 1.28 1.33 0.88
+Step 18801/20000   Activation magnitudes (3): 10.01 9.46 8.43 8.93 18.01 11.88 21.29 12.79
+Step 19001/20000   lossVa 4.9750   accVa 26.0
+Step 19001/20000   lossTr 4.9666   accTr 26.0   658s = 0.03s/step
+Step 19001/20000   Activation magnitudes (2): 1.39 0.85 0.88 1.36 1.63 1.29 1.31 0.87
+Step 19001/20000   Activation magnitudes (3): 10.05 9.74 7.93 9.08 18.24 11.88 21.24 12.74
+Step 19201/20000   lossTr 5.0065   accTr 25.9   665s = 0.03s/step
+Step 19201/20000   Activation magnitudes (2): 1.40 0.85 0.88 1.34 1.63 1.28 1.34 0.89
+Step 19201/20000   Activation magnitudes (3): 10.05 9.50 8.09 9.54 17.79 11.15 21.25 12.78
+Step 19401/20000   lossTr 4.9771   accTr 25.8   672s = 0.03s/step
+Step 19401/20000   Activation magnitudes (2): 1.41 0.84 0.88 1.33 1.63 1.29 1.34 0.89
+Step 19401/20000   Activation magnitudes (3): 10.07 9.56 7.99 8.93 17.64 11.76 21.04 12.82
+Step 19501/20000   lossVa 4.9629   accVa 26.1
+Step 19601/20000   lossTr 4.9800   accTr 25.9   678s = 0.03s/step
+Step 19601/20000   Activation magnitudes (2): 1.40 0.84 0.88 1.35 1.63 1.30 1.36 0.88
+Step 19601/20000   Activation magnitudes (3): 10.08 9.55 8.16 8.75 17.47 11.25 21.01 13.13
+Step 19801/20000   lossTr 4.9511   accTr 26.0   685s = 0.03s/step
+Step 19801/20000   Activation magnitudes (2): 1.42 0.84 0.88 1.28 1.63 1.28 1.35 0.90
+Step 19801/20000   Activation magnitudes (3): 10.08 9.89 8.29 8.73 17.88 11.67 21.65 13.60
+Step 20000/20000   lossVa 4.9518   accVa 26.2
+Step 20000/20000   Peak CUDA memory usage: 1.320 GB
+Step 20000/20000   lossTr 4.9159   accTr 26.6   691s = 0.03s/step
+Step 20000/20000   Activation magnitudes (2): 1.40 0.85 0.89 1.36 1.64 1.30 1.32 0.88
+Step 20000/20000   Activation magnitudes (3): 10.08 10.00 7.94 9.07 18.13 12.43 21.22 13.43
+Saving plot (loss/acc): /root/lm-afs/results-fixedaf20m/tr-fixed20m-group-relu24-step020000-00001131-00002922.png
+Saving plot (AF): /root/lm-afs/results-fixedaf20m/af-fixed20m-group-relu24-step000000.png
+Saving plot (act): /root/lm-afs/results-fixedaf20m/act-fixed20m-group-relu24-step020000.png
